@@ -88,27 +88,83 @@ async function init() {
     }
 }
 
+// === Custom Quick Ingredients (localStorage) ===
+
+function getCustomQuick() {
+    try { return JSON.parse(localStorage.getItem('fridge_chef_custom_quick') || '{"ingredients":[],"sauces":[]}'); }
+    catch { return { ingredients: [], sauces: [] }; }
+}
+function saveCustomQuick(data) { localStorage.setItem('fridge_chef_custom_quick', JSON.stringify(data)); }
+function getRemovedQuick() {
+    try { return JSON.parse(localStorage.getItem('fridge_chef_removed_quick') || '[]'); }
+    catch { return []; }
+}
+function saveRemovedQuick(arr) { localStorage.setItem('fridge_chef_removed_quick', JSON.stringify(arr)); }
+
 // === Quick Buttons ===
+
+let editingQuick = false;
 
 function renderQuickButtons() {
     const ingList = Array.isArray(QUICK_DATA) ? QUICK_DATA : (QUICK_DATA.ingredients || []);
     const sauceList = QUICK_DATA.sauces || [];
+    const custom = getCustomQuick();
+    const removed = getRemovedQuick();
+
+    // Merge: default (minus removed) + custom
+    const finalIng = ingList.filter(i => !removed.includes(i.name)).concat(custom.ingredients);
+    const finalSauce = sauceList.filter(i => !removed.includes(i.name)).concat(custom.sauces);
 
     const ingContainer = document.getElementById('quickButtons');
-    ingContainer.innerHTML = ingList.map(item =>
-        `<button class="quick-btn" data-ing="${item.name}">${item.emoji} ${item.name}</button>`
+    ingContainer.innerHTML = finalIng.map(item =>
+        `<button class="quick-btn${editingQuick ? ' editing' : ''}" data-ing="${item.name}">${item.emoji} ${item.name}<span class="quick-del" data-name="${item.name}">&times;</span></button>`
     ).join('');
 
     const sauceContainer = document.getElementById('quickSauceButtons');
-    sauceContainer.innerHTML = sauceList.map(item =>
-        `<button class="quick-btn quick-btn--sauce" data-ing="${item.name}">${item.emoji} ${item.name}</button>`
+    sauceContainer.innerHTML = finalSauce.map(item =>
+        `<button class="quick-btn quick-btn--sauce${editingQuick ? ' editing' : ''}" data-ing="${item.name}">${item.emoji} ${item.name}<span class="quick-del" data-name="${item.name}">&times;</span></button>`
     ).join('');
 
+    // Bind click handlers
     document.querySelectorAll('.quick-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            if (e.target.classList.contains('quick-del')) return;
             const ing = btn.dataset.ing;
             if (ingredients.has(ing)) removeIngredient(ing);
             else addIngredient(ing);
+        });
+    });
+
+    // Bind delete handlers
+    document.querySelectorAll('.quick-del').forEach(del => {
+        del.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const name = del.dataset.name;
+
+            // Remove from custom if it's custom, otherwise add to removed list
+            const custom = getCustomQuick();
+            let wasCustom = false;
+            for (const section of ['ingredients', 'sauces']) {
+                const idx = custom[section].findIndex(i => i.name === name);
+                if (idx !== -1) {
+                    custom[section].splice(idx, 1);
+                    saveCustomQuick(custom);
+                    wasCustom = true;
+                    break;
+                }
+            }
+            if (!wasCustom) {
+                const removed = getRemovedQuick();
+                if (!removed.includes(name)) {
+                    removed.push(name);
+                    saveRemovedQuick(removed);
+                }
+            }
+
+            ingredients.delete(name);
+            renderQuickButtons();
+            render();
         });
     });
 }
@@ -187,6 +243,74 @@ document.addEventListener('DOMContentLoaded', () => {
             matchMode = btn.dataset.mode;
         });
     });
+
+    // Edit quick toggle
+    const editToggle = document.getElementById('editQuickToggle');
+    const addForm = document.getElementById('addQuickForm');
+    if (editToggle) {
+        editToggle.addEventListener('click', () => {
+            editingQuick = !editingQuick;
+            editToggle.textContent = editingQuick ? '✅ 완료' : '✏️ 편집';
+            if (addForm) addForm.style.display = editingQuick ? 'flex' : 'none';
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.toggle('editing', editingQuick);
+            });
+        });
+    }
+
+    // Emoji dropdown
+    let selectedEmoji = '🍴';
+    const emojiToggle = document.getElementById('emojiToggle');
+    const emojiList = document.getElementById('emojiList');
+    if (emojiToggle) {
+        emojiToggle.addEventListener('click', () => {
+            emojiList.style.display = emojiList.style.display === 'none' ? 'grid' : 'none';
+        });
+    }
+    document.querySelectorAll('.emoji-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedEmoji = btn.dataset.emoji;
+            if (emojiToggle) emojiToggle.textContent = selectedEmoji;
+            if (emojiList) emojiList.style.display = 'none';
+        });
+    });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.emoji-dropdown') && emojiList) emojiList.style.display = 'none';
+    });
+
+    // Add quick ingredient
+    const addQuickBtn = document.getElementById('addQuickBtn');
+    if (addQuickBtn) {
+        addQuickBtn.addEventListener('click', () => {
+            const nameEl = document.getElementById('qIngName');
+            const sectionEl = document.getElementById('qIngSection');
+            const name = nameEl.value.trim();
+            if (!name) { alert('재료 이름을 입력해주세요'); return; }
+
+            const section = sectionEl.value; // 'ingredients' or 'sauces'
+            const custom = getCustomQuick();
+
+            // Check duplicates
+            const allNames = [
+                ...(QUICK_DATA.ingredients || []),
+                ...(QUICK_DATA.sauces || []),
+                ...custom.ingredients,
+                ...custom.sauces,
+            ].map(i => i.name);
+            if (allNames.includes(name)) { alert('이미 등록된 재료입니다'); return; }
+
+            custom[section].push({ name, emoji: selectedEmoji });
+            saveCustomQuick(custom);
+
+            // Remove from removed list if it was there
+            const removed = getRemovedQuick();
+            const idx = removed.indexOf(name);
+            if (idx !== -1) { removed.splice(idx, 1); saveRemovedQuick(removed); }
+
+            nameEl.value = '';
+            renderQuickButtons();
+        });
+    }
 
     document.getElementById('searchBtn')?.addEventListener('click', doSearch);
 

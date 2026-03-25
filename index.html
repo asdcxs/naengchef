@@ -52,12 +52,43 @@
                 <div class="quick-tags">
                     <div class="quick-tags-header">
                         <span class="quick-label">🥬 재료</span>
+                        <button id="editQuickToggle" class="edit-quick-toggle">✏️ 편집</button>
                     </div>
                     <div id="quickButtons" class="quick-buttons"></div>
                     <div class="quick-tags-header" style="margin-top:8px">
                         <span class="quick-label">🫗 소스 · 양념</span>
                     </div>
                     <div id="quickSauceButtons" class="quick-buttons"></div>
+                    <!-- Add Quick Ingredient (hidden) -->
+                    <div id="addQuickForm" class="add-quick-form" style="display:none">
+                        <input type="text" id="qIngName" placeholder="재료 이름 (예: 닭고기)" class="ch-input" style="flex:2">
+                        <div class="emoji-dropdown">
+                            <button type="button" id="emojiToggle" class="emoji-toggle" title="이모지 선택">🍴</button>
+                            <div id="emojiList" class="emoji-list" style="display:none">
+                                <button type="button" class="emoji-opt" data-emoji="🍴">🍴</button>
+                                <button type="button" class="emoji-opt" data-emoji="🥩">🥩</button>
+                                <button type="button" class="emoji-opt" data-emoji="🐟">🐟</button>
+                                <button type="button" class="emoji-opt" data-emoji="🦐">🦐</button>
+                                <button type="button" class="emoji-opt" data-emoji="🥬">🥬</button>
+                                <button type="button" class="emoji-opt" data-emoji="🧅">🧅</button>
+                                <button type="button" class="emoji-opt" data-emoji="🥕">🥕</button>
+                                <button type="button" class="emoji-opt" data-emoji="🍚">🍚</button>
+                                <button type="button" class="emoji-opt" data-emoji="🍜">🍜</button>
+                                <button type="button" class="emoji-opt" data-emoji="🧀">🧀</button>
+                                <button type="button" class="emoji-opt" data-emoji="🥛">🥛</button>
+                                <button type="button" class="emoji-opt" data-emoji="🥚">🥚</button>
+                                <button type="button" class="emoji-opt" data-emoji="🌶️">🌶️</button>
+                                <button type="button" class="emoji-opt" data-emoji="🍗">🍗</button>
+                                <button type="button" class="emoji-opt" data-emoji="🥫">🥫</button>
+                                <button type="button" class="emoji-opt" data-emoji="🫘">🫘</button>
+                            </div>
+                        </div>
+                        <select id="qIngSection" class="ch-input" style="flex:1;min-width:80px">
+                            <option value="ingredients">재료</option>
+                            <option value="sauces">소스</option>
+                        </select>
+                        <button id="addQuickBtn" class="add-channel-btn">추가</button>
+                    </div>
                 </div>
 
                 <button id="searchBtn" class="search-btn" disabled>
