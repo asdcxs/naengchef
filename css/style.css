@@ -19,7 +19,7 @@
     --radius: 12px;
     --radius-sm: 8px;
     --font: 'Noto Sans KR', -apple-system, sans-serif;
-    --font-display: 'Black Han Sans', 'Noto Sans KR', sans-serif;
+    --font-display: 'Jua', 'Noto Sans KR', sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,7 +38,7 @@ body {
 .header { padding: 2.5rem 0 1.5rem; text-align: center; }
 .logo { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .logo-icon { font-size: 2.2rem; filter: drop-shadow(0 2px 8px rgba(232, 150, 63, 0.3)); }
-.logo-text { font-family: var(--font-display); font-size: 2.4rem; color: var(--accent); letter-spacing: -0.02em; }
+.logo-text { font-family: var(--font-display); font-size: 2.8rem; color: var(--accent); letter-spacing: 0.05em; }
 .tagline { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.75rem; }
 
 .header-badges { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
