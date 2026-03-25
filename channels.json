@@ -1,0 +1,114 @@
+[
+    {
+        "id": "1mincook",
+        "name": "1분요리 뚝딱이형",
+        "desc": "1분 안에 끝나는 간단 레시피. 300만 구독.",
+        "url": "https://www.youtube.com/@1mincook",
+        "tags": ["자취요리", "초스피드"],
+        "emoji": "⚡"
+    },
+    {
+        "id": "paik",
+        "name": "백종원 PAIK JONG WON",
+        "desc": "대한민국 대표 셰프. 기본기부터 탄탄한 레시피.",
+        "url": "https://www.youtube.com/@paik_jongwon",
+        "tags": ["기본기", "한식"],
+        "emoji": "👨‍🍳"
+    },
+    {
+        "id": "simplecooking",
+        "name": "자취요리신 simple cooking",
+        "desc": "자취생 맞춤 초간단 레시피. 150만 구독.",
+        "url": "https://www.youtube.com/@자취요리신simplecooking",
+        "tags": ["자취요리", "초스피드"],
+        "emoji": "🏠"
+    },
+    {
+        "id": "10000recipe",
+        "name": "만개의레시피",
+        "desc": "국내 최대 레시피 플랫폼 공식 채널.",
+        "url": "https://www.youtube.com/@10000recipe",
+        "tags": ["종합", "한식"],
+        "emoji": "📖"
+    },
+    {
+        "id": "onemealaday",
+        "name": "하루한끼",
+        "desc": "기본 재료로 한끼 뚝딱. 352만 구독. '이제 다 된 거나 다름없습니다'",
+        "url": "https://www.youtube.com/@onemealaday888",
+        "tags": ["자취요리", "초간단"],
+        "emoji": "🍱"
+    },
+    {
+        "id": "honeykkicook",
+        "name": "꿀키 honeykki",
+        "desc": "감성 영상미 + 한식/디저트/양식 다양한 레시피.",
+        "url": "https://www.youtube.com/@honeykkicook",
+        "tags": ["감성요리", "다양한장르"],
+        "emoji": "🍯"
+    },
+    {
+        "id": "recipes_for_daughters",
+        "name": "딸을 위한 레시피",
+        "desc": "딸에게 알려주듯 정성스럽고 쉬운 집밥 레시피.",
+        "url": "https://www.youtube.com/@딸을위한레시피",
+        "tags": ["집밥", "초간단"],
+        "emoji": "👩‍🍳"
+    },
+    {
+        "id": "leeyeonbok",
+        "name": "이연복의 복주머니",
+        "desc": "중식 대가 이연복 셰프. 쉽게 따라하는 중식 레시피.",
+        "url": "https://www.youtube.com/@leeyeonbok",
+        "tags": ["중식", "프로셰프"],
+        "emoji": "🥟"
+    },
+    {
+        "id": "kimjinsun",
+        "name": "김진순 점심시간",
+        "desc": "직장인 점심 도시락 레시피.",
+        "url": "https://www.youtube.com/@kimjinsun_lunch",
+        "tags": ["도시락", "집밥"],
+        "emoji": "🍙"
+    },
+    {
+        "id": "runaway_son",
+        "name": "집나간아들",
+        "desc": "자취생 실전 요리.",
+        "url": "https://www.youtube.com/@Runaway_son",
+        "tags": ["자취요리", "초간단"],
+        "emoji": "🏃"
+    },
+    {
+        "id": "koreanhomecooking",
+        "name": "집밥 korean home cooking",
+        "desc": "한식 집밥 전문.",
+        "url": "https://www.youtube.com/@koreanhomecooking",
+        "tags": ["집밥", "한식"],
+        "emoji": "🍲"
+    },
+    {
+        "id": "restaurantrecipelab",
+        "name": "식당레시피연구소",
+        "desc": "식당 맛을 집에서 재현.",
+        "url": "https://www.youtube.com/@restaurantrecipelab",
+        "tags": ["식당맛", "한식"],
+        "emoji": "🔬"
+    },
+    {
+        "id": "juntv",
+        "name": "JUNTV",
+        "desc": "남자 자취 요리.",
+        "url": "https://www.youtube.com/@JUNTV9",
+        "tags": ["자취요리", "가성비"],
+        "emoji": "🧑‍🍳"
+    },
+    {
+        "id": "huttakrecipe",
+        "name": "후딱 레시피",
+        "desc": "빠르고 쉬운 레시피.",
+        "url": "https://www.youtube.com/@huttakrecipe",
+        "tags": ["초스피드", "초간단"],
+        "emoji": "💨"
+    }
+]

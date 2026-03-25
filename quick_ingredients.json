@@ -1,0 +1,14 @@
+[
+    {"name": "계란", "emoji": "🥚"},
+    {"name": "밥", "emoji": "🍚"},
+    {"name": "김치", "emoji": "🥬"},
+    {"name": "두부", "emoji": "🫘"},
+    {"name": "양파", "emoji": "🧅"},
+    {"name": "대파", "emoji": "🌿"},
+    {"name": "돼지고기", "emoji": "🥩"},
+    {"name": "라면", "emoji": "🍜"},
+    {"name": "감자", "emoji": "🥔"},
+    {"name": "참치캔", "emoji": "🐟"},
+    {"name": "스팸", "emoji": "🥫"},
+    {"name": "버섯", "emoji": "🍄"}
+]
