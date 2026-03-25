@@ -266,6 +266,15 @@ function updateShoppingBadge() {
     if (el) el.textContent = count > 0 ? count : '';
 }
 
+function openShoppingSidebar() {
+    document.getElementById('shoppingSidebar')?.classList.add('open');
+    document.getElementById('shoppingOverlay')?.classList.add('open');
+}
+function closeShoppingSidebar() {
+    document.getElementById('shoppingSidebar')?.classList.remove('open');
+    document.getElementById('shoppingOverlay')?.classList.remove('open');
+}
+
 function renderShoppingList() {
     const list = getShoppingList();
     const container = document.getElementById('shoppingItems');
@@ -279,19 +288,16 @@ function renderShoppingList() {
     if (empty) empty.style.display = 'none';
     const sorted = [...list].sort((a, b) => (a.checked ? 1 : 0) - (b.checked ? 1 : 0));
     container.innerHTML = sorted.map(item => {
-        const searchUrl = COUPANG_SEARCH
-            ? `${COUPANG_SEARCH}&q=${encodeURIComponent(item.name)}`
-            : `https://www.coupang.com/np/search?component=&q=${encodeURIComponent(item.name)}`;
         const cls = item.checked ? ' checked' : '';
-        return `<span class="shopping-item${cls}" data-name="${item.name}">
+        return `<div class="shop-row${cls}" data-name="${esc(item.name)}">
             <input type="checkbox" class="shop-check" ${item.checked ? 'checked' : ''}>
-            <a href="${searchUrl}" target="_blank" rel="noopener" title="쿠팡에서 검색">${esc(item.name)}</a>
-            <span class="shop-del" data-name="${item.name}">&times;</span>
-        </span>`;
+            <span class="shop-name">${esc(item.name)}</span>
+            <button class="shop-del" data-name="${esc(item.name)}">&times;</button>
+        </div>`;
     }).join('');
     container.querySelectorAll('.shop-check').forEach(cb => {
         cb.addEventListener('change', (e) => {
-            const name = e.target.closest('.shopping-item').dataset.name;
+            const name = e.target.closest('.shop-row').dataset.name;
             const l = getShoppingList();
             const it = l.find(i => i.name === name);
             if (it) it.checked = e.target.checked;
@@ -522,14 +528,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Shopping list toggle
+    // Shopping sidebar toggle
     document.getElementById('shoppingToggleBtn')?.addEventListener('click', () => {
-        const section = document.getElementById('shoppingSection');
-        const btn = document.getElementById('shoppingToggleBtn');
-        const visible = section.style.display !== 'none';
-        section.style.display = visible ? 'none' : 'block';
-        btn.classList.toggle('active', !visible);
+        const sidebar = document.getElementById('shoppingSidebar');
+        if (sidebar.classList.contains('open')) closeShoppingSidebar();
+        else openShoppingSidebar();
     });
+    document.getElementById('closeSidebar')?.addEventListener('click', closeShoppingSidebar);
+    document.getElementById('shoppingOverlay')?.addEventListener('click', closeShoppingSidebar);
 
     // Copy shopping list
     document.getElementById('copyShoppingBtn')?.addEventListener('click', () => {
@@ -568,9 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addToShoppingList(recipe);
         cartBtn.classList.add('cart-added');
         cartBtn.textContent = '✓';
-        // Show shopping section
-        document.getElementById('shoppingSection').style.display = 'block';
-        document.getElementById('shoppingToggleBtn')?.classList.add('active');
+        openShoppingSidebar();
     });
 
     init();

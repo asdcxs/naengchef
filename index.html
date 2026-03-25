@@ -108,19 +108,6 @@
                 <div id="pagination" class="pagination"></div>
             </section>
 
-            <!-- Shopping List -->
-            <section id="shoppingSection" class="shopping-section" style="display:none">
-                <div class="shopping-header">
-                    <h2>🛒 장보기 목록</h2>
-                    <div class="shopping-actions">
-                        <button id="copyShoppingBtn" class="shopping-action-btn" title="복사">📋 복사</button>
-                        <button id="clearShoppingBtn" class="shopping-action-btn" title="비우기">🗑 비우기</button>
-                    </div>
-                </div>
-                <div id="shoppingItems" class="shopping-items"></div>
-                <div id="shoppingEmpty" class="shopping-empty">레시피 카드의 🛒 버튼으로 재료를 담아보세요</div>
-            </section>
-
             <!-- YouTube Channels -->
             <section class="channels-section">
                 <div class="channels-header">
@@ -140,6 +127,25 @@
             <p>레시피 출처: <a href="https://www.10000recipe.com" target="_blank">만개의레시피</a> · <a href="https://chef-choice.tistory.com" target="_blank">뚝딱이형</a></p>
         </footer>
     </div>
+
+    <!-- Shopping Sidebar -->
+    <div id="shoppingOverlay" class="shopping-overlay"></div>
+    <aside id="shoppingSidebar" class="shopping-sidebar">
+        <div class="sidebar-header">
+            <h2>🛒 장보기 목록</h2>
+            <button id="closeSidebar" class="sidebar-close">&times;</button>
+        </div>
+        <div class="sidebar-actions">
+            <button id="copyShoppingBtn" class="shopping-action-btn">📋 복사</button>
+            <button id="clearShoppingBtn" class="shopping-action-btn">🗑 비우기</button>
+        </div>
+        <div class="sidebar-coupang">
+            <div class="coupang-label">🛍️ 쿠팡에서 재료 검색</div>
+            <iframe src="https://coupa.ng/cl36SR" width="100%" height="36" frameborder="0" scrolling="no" referrerpolicy="unsafe-url" browsingtopics></iframe>
+        </div>
+        <div id="shoppingItems" class="shopping-items-sidebar"></div>
+        <div id="shoppingEmpty" class="shopping-empty">레시피 카드의 🛒 버튼으로<br>재료를 담아보세요</div>
+    </aside>
 
     <script src="js/app.js"></script>
 </body>
