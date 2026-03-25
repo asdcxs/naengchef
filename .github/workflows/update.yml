@@ -1,56 +1,85 @@
-   name: Daily Recipe Update                                                                                                                                                                                   
-                                                                                                                                                                                                               
-   on:                                                                                                                                                                                                         
-     schedule:                                                                                                                                                                                                 
-       - cron: '0 0 * * *'                                                                                                                                                                                     
-     workflow_dispatch:                                                                                                                                                                                        
-                                                                                                                                                                                                               
-   env:                                                                                                                                                                                                        
-     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true                                                                                                                                                                  
-                                                                                                                                                                                                               
-   permissions:                                                                                                                                                                                                
-     contents: write                                                                                                                                                                                           
-                                                                                                                                                                                                               
-   jobs:                                                                                                                                                                                                       
-     update:                                                                                                                                                                                                   
-       runs-on: ubuntu-latest                                                                                                                                                                                  
-       steps:                                                                                                                                                                                                  
-         - uses: actions/checkout@v4                                                                                                                                                                           
-                                                                                                                                                                                                               
-         - uses: actions/setup-python@v5                                                                                                                                                                       
-           with:                                                                                                                                                                                               
-             python-version: '3.12'                                                                                                                                                                            
-                                                                                                                                                                                                               
-         - name: Install dependencies                                                                                                                                                                          
-           run: pip install requests beautifulsoup4                                                                                                                                                            
-                                                                                                                                                                                                               
-         - name: Run crawler                                                                                                                                                                                   
-           run: python crawler.py --update                                                                                                                                                                     
-                                                                                                                                                                                                               
-         - name: Export JSON                                                                                                                                                                                   
-           run: |                                                                                                                                                                                              
-             python -c "                                                                                                                                                                                       
-             import json, sqlite3                                                                                                                                                                              
-             conn = sqlite3.connect('recipes.db')                                                                                                                                                              
-             conn.row_factory = sqlite3.Row                                                                                                                                                                    
-             rows = conn.execute('SELECT * FROM recipes ORDER BY id').fetchall()                                                                                                                               
-             conn.close()                                                                                                                                                                                      
-             recipes = []                                                                                                                                                                                      
-             for r in rows:                                                                                                                                                                                    
-                 recipes.append({                                                                                                                                                                              
-                     'id':r['id'],'t':r['title'],'i':r['ingredients'],'th':r['thumbnail_url'] or '',                                                                                                           
-                     'u':r['source_url'],'s':r['servings'] or '','ct':r['cook_time'] or '',                                                                                                                    
-                     'd':r['difficulty'] or '','tg':r['tags'] or '','st':r['source_type'] or ''                                                                                                                
-                 })                                                                                                                                                                                            
-             with open('recipes.json','w',encoding='utf-8') as f:                                                                                                                                              
-                 json.dump(recipes,f,ensure_ascii=False,separators=(',',':'))                                                                                                                                  
-             print(f'{len(recipes)} recipes exported')                                                                                                                                                         
-             "                                                                                                                                                                                                 
-                                                                                                                                                                                                               
-         - name: Commit and Push                                                                                                                                                                               
-           run: |                                                                                                                                                                                              
-             git config user.name "github-actions[bot]"                                                                                                                                                        
-             git config user.email "github-actions[bot]@users.noreply.github.com"                                                                                                                              
-             git add recipes.json recipes.db                                                                                                                                                                   
-             git diff --cached --quiet || git commit -m "auto: $(date +%Y-%m-%d) 레시피 업데이트"                                                                                                              
-             git push
+name: Daily Recipe Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run crawler (update mode)
+        run: python crawler.py --update
+
+      - name: Export recipes.json
+        run: |
+          python -c "
+          import sqlite3, json, re
+
+          conn = sqlite3.connect('recipes.db')
+          conn.row_factory = sqlite3.Row
+          rows = conn.execute('SELECT title, ingredients, thumbnail_url, source_url, servings, cook_time, difficulty, source_type, source_id FROM recipes ORDER BY id DESC').fetchall()
+          conn.close()
+
+          def clean_ingredients(text):
+              parts = []
+              for item in text.split(','):
+                  item = item.strip()
+                  if any(t in item for t in ['도마구매','조리용나이프','냄비구매','접시구매','요리스푼','볼구매','프라이팬구매','믹싱볼','채반구매','조리용스푼','숟가락구매','믹서기','컵구매']):
+                      continue
+                  item = re.sub(r'\s*구매\s*$', '', item).strip()
+                  if item:
+                      parts.append(item)
+              return ','.join(parts)
+
+          recipes = []
+          for r in rows:
+              sid = r['source_id'] or ''
+              if sid.startswith('10000recipe_'):
+                  url = sid.replace('10000recipe_', '')
+              else:
+                  url = r['source_url']
+              thumb = r['thumbnail_url'] or ''
+              if 'recipe_no/' in thumb:
+                  img = thumb.split('recipe_no/')[-1]
+              elif thumb:
+                  img = thumb
+              else:
+                  img = ''
+              entry = {'t': r['title'], 'i': clean_ingredients(r['ingredients']), 'u': url, 'sid': sid}
+              if img: entry['img'] = img
+              if r['servings']: entry['sv'] = r['servings']
+              if r['cook_time']: entry['ct'] = r['cook_time']
+              if r['difficulty']: entry['df'] = r['difficulty']
+              if r['source_type'] and r['source_type'] != '만개의레시피':
+                  entry['st'] = r['source_type']
+              recipes.append(entry)
+
+          with open('recipes.json', 'w', encoding='utf-8') as f:
+              json.dump(recipes, f, ensure_ascii=False, separators=(',',':'))
+          print(f'{len(recipes)} recipes exported')
+          "
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add recipes.json recipes.db
+          git diff --cached --quiet || git commit -m "auto: $(date +%Y-%m-%d) 레시피 업데이트"
+          git push
