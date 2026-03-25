@@ -52,6 +52,28 @@ body {
 }
 .crawl-btn:hover { background: var(--accent-glow); border-color: rgba(232, 150, 63, 0.3); color: var(--accent); }
 
+.fav-filter-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 0.3rem 0.75rem; border-radius: 2rem; font-size: 0.8rem; font-family: var(--font);
+    cursor: pointer; transition: all 0.2s;
+}
+.fav-filter-btn:hover { background: var(--accent-glow); border-color: rgba(232, 150, 63, 0.3); color: var(--accent); }
+.fav-filter-btn.active { background: var(--accent); color: var(--bg); border-color: transparent; font-weight: 600; }
+.fav-filter-btn #favCount { font-weight: 700; }
+
+/* === Recipe Card Wrap + Fav Button === */
+.recipe-card-wrap { position: relative; }
+.fav-btn {
+    position: absolute; top: 0.5rem; right: 0.5rem; z-index: 2;
+    background: rgba(0,0,0,0.55); border: none; color: var(--text-muted);
+    width: 2rem; height: 2rem; border-radius: 50%; font-size: 1.1rem;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.fav-btn:hover { background: rgba(0,0,0,0.75); color: #fbbf24; transform: scale(1.15); }
+.fav-btn.fav-active { color: #fbbf24; background: rgba(0,0,0,0.7); }
+
 .crawl-status {
     text-align: center; padding: 0.5rem; margin-bottom: 0.5rem;
     background: var(--accent-glow); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--accent);
@@ -123,12 +145,24 @@ body {
 }
 .quick-btn:hover { background: var(--accent-glow); border-color: rgba(232, 150, 63, 0.3); color: var(--accent); }
 .quick-btn.active { background: var(--tag-bg); color: var(--tag-text); border-color: transparent; font-weight: 600; }
+.quick-btn--sauce { border-style: dashed; }
+.quick-btn--sauce.active { border-style: solid; }
 .quick-btn .quick-del {
     display: none; position: absolute; top: -6px; right: -6px; background: #e74c3c; color: white;
     width: 1.1rem; height: 1.1rem; border-radius: 50%; font-size: 0.65rem; line-height: 1.1rem;
     text-align: center; cursor: pointer; border: 1.5px solid var(--bg);
 }
 .quick-btn.editing .quick-del { display: block; }
+
+/* === Match Mode Toggle === */
+.search-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.match-toggle { display: flex; background: var(--bg-input); border: 1px solid var(--border); border-radius: 2rem; overflow: hidden; }
+.match-opt {
+    background: none; border: none; color: var(--text-muted); padding: 0.3rem 0.75rem;
+    font-size: 0.78rem; font-family: var(--font); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.match-opt.active { background: var(--accent); color: var(--bg); font-weight: 600; }
+.match-opt:hover:not(.active) { color: var(--accent); }
 
 /* === Search Button === */
 .search-btn {
@@ -154,10 +188,11 @@ body {
 
 /* === Recipe Cards === */
 .recipe-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.recipe-card-wrap { position: relative; }
 .recipe-card {
     background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
     overflow: hidden; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    cursor: pointer; text-decoration: none; color: inherit; display: block;
+    cursor: pointer; text-decoration: none; color: inherit; display: block; height: 100%;
 }
 .recipe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); border-color: rgba(232, 150, 63, 0.25); }
 .card-thumb { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--surface); display: block; }
