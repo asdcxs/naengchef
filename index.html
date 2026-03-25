@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>냉장고 셰프</title>
+    <meta name="description" content="냉장고 재료를 넣으면 요리가 나옵니다. 91,000+ 레시피 검색.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&family=Black+Han+Sans&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="app">
@@ -18,22 +19,22 @@
                 </h1>
                 <p class="tagline">냉장고 재료를 넣으면, 요리가 나옵니다</p>
                 <div class="header-badges">
-                    <div class="db-badge">📚 레시피 <strong>{{ recipe_count }}</strong>개 보유</div>
+                    <div class="db-badge">📚 레시피 <strong id="recipeCount">-</strong>개 보유</div>
                     <button id="favFilterBtn" class="fav-filter-btn" title="즐겨찾기 보기">⭐ <span id="favCount"></span></button>
-                    <button id="crawlBtn" class="crawl-btn" title="새 레시피 크롤링">🔄 크롤링</button>
                 </div>
             </div>
         </header>
 
-        <!-- Crawl Status -->
-        <div id="crawlStatus" class="crawl-status" style="display:none">
-            <span class="spinner-sm"></span>
-            <span id="crawlText">크롤링 중...</span>
-        </div>
-
         <main class="main">
+            <!-- Loading -->
+            <div id="loading" class="empty-state">
+                <div class="empty-icon">⏳</div>
+                <p>레시피 데이터 로딩 중...</p>
+                <div id="loadProgress" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem"></div>
+            </div>
+
             <!-- Search Section -->
-            <section class="search-section">
+            <section id="searchSection" class="search-section" style="display:none">
                 <div class="search-header-row">
                     <label class="input-label" for="ingredientInput">냉장고에 뭐가 있나요?</label>
                     <div class="match-toggle">
@@ -43,7 +44,7 @@
                 </div>
                 <div class="tag-input-area">
                     <div id="tags" class="tags"></div>
-                    <input type="text" id="ingredientInput" 
+                    <input type="text" id="ingredientInput"
                         placeholder="재료를 입력하고 Enter (예: 계란, 김치, 두부...)"
                         autocomplete="off">
                 </div>
@@ -51,55 +52,16 @@
                 <div class="quick-tags">
                     <div class="quick-tags-header">
                         <span class="quick-label">🥬 재료</span>
-                        <button id="editQuickToggle" class="edit-quick-toggle">✏️ 편집</button>
                     </div>
-                    <div id="quickButtons" class="quick-buttons">
-                        {% for item in quick_ingredients %}
-                        <button class="quick-btn" data-ing="{{ item.name }}">{{ item.emoji }} {{ item.name }}</button>
-                        {% endfor %}
-                    </div>
-
+                    <div id="quickButtons" class="quick-buttons"></div>
                     <div class="quick-tags-header" style="margin-top:8px">
                         <span class="quick-label">🫗 소스 · 양념</span>
                     </div>
-                    <div id="quickSauceButtons" class="quick-buttons">
-                        {% for item in quick_sauces %}
-                        <button class="quick-btn quick-btn--sauce" data-ing="{{ item.name }}">{{ item.emoji }} {{ item.name }}</button>
-                        {% endfor %}
-                    </div>
-                    <!-- Add Quick Ingredient (hidden) -->
-                    <div id="addQuickForm" class="add-quick-form" style="display:none">
-                        <input type="text" id="qIngName" placeholder="재료 이름 (예: 닭고기)" class="ch-input" style="flex:2">
-                        <div class="emoji-dropdown">
-                            <button type="button" id="emojiToggle" class="emoji-toggle" title="이모지 선택">🍴</button>
-                            <div id="emojiList" class="emoji-list" style="display:none">
-                                <button type="button" class="emoji-opt" data-emoji="🍴">🍴</button>
-                                <button type="button" class="emoji-opt" data-emoji="🥩">🥩</button>
-                                <button type="button" class="emoji-opt" data-emoji="🐟">🐟</button>
-                                <button type="button" class="emoji-opt" data-emoji="🦐">🦐</button>
-                                <button type="button" class="emoji-opt" data-emoji="🥬">🥬</button>
-                                <button type="button" class="emoji-opt" data-emoji="🧅">🧅</button>
-                                <button type="button" class="emoji-opt" data-emoji="🥕">🥕</button>
-                                <button type="button" class="emoji-opt" data-emoji="🍚">🍚</button>
-                                <button type="button" class="emoji-opt" data-emoji="🍜">🍜</button>
-                                <button type="button" class="emoji-opt" data-emoji="🧀">🧀</button>
-                                <button type="button" class="emoji-opt" data-emoji="🥛">🥛</button>
-                                <button type="button" class="emoji-opt" data-emoji="🥚">🥚</button>
-                                <button type="button" class="emoji-opt" data-emoji="🌶️">🌶️</button>
-                                <button type="button" class="emoji-opt" data-emoji="🍗">🍗</button>
-                                <button type="button" class="emoji-opt" data-emoji="🥫">🥫</button>
-                                <button type="button" class="emoji-opt" data-emoji="🫘">🫘</button>
-                            </div>
-                        </div>
-                        <button id="addQuickBtn" class="add-channel-btn">추가</button>
-                    </div>
+                    <div id="quickSauceButtons" class="quick-buttons"></div>
                 </div>
 
                 <button id="searchBtn" class="search-btn" disabled>
                     <span class="search-btn-text">🔍 레시피 찾기</span>
-                    <span class="search-btn-loading" style="display:none">
-                        <span class="spinner"></span> 검색 중...
-                    </span>
                 </button>
             </section>
 
@@ -117,22 +79,12 @@
             <section class="channels-section">
                 <div class="channels-header">
                     <h2>📺 추천 요리 유튜버</h2>
-                    <button id="addChannelToggle" class="add-channel-toggle">+ 추가</button>
                 </div>
-
-                <!-- Add Channel Form (hidden by default) -->
-                <div id="addChannelForm" class="add-channel-form" style="display:none">
-                    <input type="text" id="chName" placeholder="채널 이름 (예: 뚝딱이형)" class="ch-input">
-                    <input type="text" id="chUrl" placeholder="유튜브 URL 또는 @핸들" class="ch-input">
-                    <input type="text" id="chDesc" placeholder="설명 (선택)" class="ch-input">
-                    <button id="addChannelBtn" class="add-channel-btn">추가하기</button>
-                </div>
-
                 <div id="channelsGrid" class="channels-grid"></div>
             </section>
 
             <!-- Empty state -->
-            <section id="emptyState" class="empty-state">
+            <section id="emptyState" class="empty-state" style="display:none">
                 <div class="empty-icon">🍳</div>
                 <p>재료를 입력하면 만들 수 있는 요리를 찾아드려요</p>
             </section>
@@ -143,10 +95,6 @@
         </footer>
     </div>
 
-    <script>
-        const ALL_CHANNELS = {{ channels | tojson }};
-        let matchMode = 'or';
-    </script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
