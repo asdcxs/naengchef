@@ -3,6 +3,7 @@
 let ALL_RECIPES = [];
 let ALL_CHANNELS = [];
 let QUICK_DATA = {};
+let INGREDIENT_INDEX = []; // unique ingredient names for autocomplete
 const ingredients = new Set();
 let allResults = [];
 let currentPage = 1;
@@ -11,6 +12,7 @@ let showFavoritesOnly = false;
 
 const THUMB_PREFIX = 'https://recipe1.ezmember.co.kr/cache/recipe/2024/';
 const URL_PREFIX = 'https://www.10000recipe.com/recipe/';
+const COUPANG_SEARCH = ''; // 쿠팡 파트너스 링크 (비워두면 일반 쿠팡 검색)
 
 function getPageSize() {
     const w = window.innerWidth;
@@ -79,9 +81,12 @@ async function init() {
         document.getElementById('searchSection').style.display = 'block';
         document.getElementById('emptyState').style.display = 'block';
 
+        buildIngredientIndex();
         renderQuickButtons();
         renderChannels();
         updateFavBadge();
+        updateShoppingBadge();
+        renderShoppingList();
     } catch (e) {
         document.getElementById('loading').innerHTML =
             `<div class="empty-icon">😥</div><p>데이터 로딩 실패: ${e.message}</p>`;
@@ -169,6 +174,142 @@ function renderQuickButtons() {
     });
 }
 
+// === Autocomplete Index ===
+
+function buildIngredientIndex() {
+    const counter = {};
+    for (const r of ALL_RECIPES) {
+        for (let item of r.i.split(',')) {
+            item = item.trim();
+            if (!item || item.length > 10 || item.length < 2) continue;
+            let name = item.replace(/\s+[\d./½⅓¼⅔¾~].*$/, '').replace(/\s*\(.*?\)/, '').trim();
+            if (name.length < 2 || name.length > 8) continue;
+            if (/^[\d./\s]+$/.test(name)) continue;
+            counter[name] = (counter[name] || 0) + 1;
+        }
+    }
+    INGREDIENT_INDEX = Object.entries(counter)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 500)
+        .map(e => e[0]);
+}
+
+let acHighlight = -1;
+
+function showAutocomplete(query) {
+    const list = document.getElementById('autocompleteList');
+    if (!query || query.length < 1) { list.style.display = 'none'; return; }
+    const q = query.toLowerCase();
+    const matches = INGREDIENT_INDEX
+        .filter(name => name.includes(q) && !ingredients.has(name))
+        .slice(0, 8);
+    if (matches.length === 0) { list.style.display = 'none'; return; }
+    acHighlight = -1;
+    list.innerHTML = matches.map((name, i) => {
+        const hl = name.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+        return `<div class="autocomplete-item" data-name="${name}" data-idx="${i}">${hl}</div>`;
+    }).join('');
+    list.style.display = 'block';
+    list.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+            addIngredient(item.dataset.name);
+            document.getElementById('ingredientInput').value = '';
+            list.style.display = 'none';
+        });
+    });
+}
+
+function navigateAutocomplete(dir) {
+    const items = document.getElementById('autocompleteList').querySelectorAll('.autocomplete-item');
+    if (items.length === 0) return;
+    items.forEach(i => i.classList.remove('highlighted'));
+    acHighlight += dir;
+    if (acHighlight < 0) acHighlight = items.length - 1;
+    if (acHighlight >= items.length) acHighlight = 0;
+    items[acHighlight].classList.add('highlighted');
+}
+
+function selectAutocomplete() {
+    const items = document.getElementById('autocompleteList').querySelectorAll('.autocomplete-item');
+    if (acHighlight >= 0 && acHighlight < items.length) {
+        addIngredient(items[acHighlight].dataset.name);
+        document.getElementById('ingredientInput').value = '';
+        document.getElementById('autocompleteList').style.display = 'none';
+        return true;
+    }
+    return false;
+}
+
+// === Shopping List (localStorage) ===
+
+function getShoppingList() {
+    try { return JSON.parse(localStorage.getItem('fridge_chef_shopping') || '[]'); } catch { return []; }
+}
+function saveShoppingList(list) { localStorage.setItem('fridge_chef_shopping', JSON.stringify(list)); }
+
+function addToShoppingList(recipe) {
+    const list = getShoppingList();
+    for (let item of recipe.i.split(',')) {
+        item = item.trim();
+        if (!item || item.length < 2) continue;
+        if (list.some(s => s.name === item)) continue;
+        list.push({ name: item, checked: false });
+    }
+    saveShoppingList(list);
+    updateShoppingBadge();
+    renderShoppingList();
+}
+
+function updateShoppingBadge() {
+    const count = getShoppingList().filter(i => !i.checked).length;
+    const el = document.getElementById('shoppingCount');
+    if (el) el.textContent = count > 0 ? count : '';
+}
+
+function renderShoppingList() {
+    const list = getShoppingList();
+    const container = document.getElementById('shoppingItems');
+    const empty = document.getElementById('shoppingEmpty');
+    if (!container) return;
+    if (list.length === 0) {
+        container.innerHTML = '';
+        if (empty) empty.style.display = 'block';
+        return;
+    }
+    if (empty) empty.style.display = 'none';
+    const sorted = [...list].sort((a, b) => (a.checked ? 1 : 0) - (b.checked ? 1 : 0));
+    container.innerHTML = sorted.map(item => {
+        const searchUrl = COUPANG_SEARCH
+            ? `${COUPANG_SEARCH}&q=${encodeURIComponent(item.name)}`
+            : `https://www.coupang.com/np/search?component=&q=${encodeURIComponent(item.name)}`;
+        const cls = item.checked ? ' checked' : '';
+        return `<span class="shopping-item${cls}" data-name="${item.name}">
+            <input type="checkbox" class="shop-check" ${item.checked ? 'checked' : ''}>
+            <a href="${searchUrl}" target="_blank" rel="noopener" title="쿠팡에서 검색">${esc(item.name)}</a>
+            <span class="shop-del" data-name="${item.name}">&times;</span>
+        </span>`;
+    }).join('');
+    container.querySelectorAll('.shop-check').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const name = e.target.closest('.shopping-item').dataset.name;
+            const l = getShoppingList();
+            const it = l.find(i => i.name === name);
+            if (it) it.checked = e.target.checked;
+            saveShoppingList(l);
+            updateShoppingBadge();
+            renderShoppingList();
+        });
+    });
+    container.querySelectorAll('.shop-del').forEach(del => {
+        del.addEventListener('click', () => {
+            const l = getShoppingList().filter(i => i.name !== del.dataset.name);
+            saveShoppingList(l);
+            updateShoppingBadge();
+            renderShoppingList();
+        });
+    });
+}
+
 // === Channels ===
 
 function renderChannels() {
@@ -221,13 +362,32 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     document.getElementById('ingredientInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); navigateAutocomplete(1); return; }
+        if (e.key === 'ArrowUp') { e.preventDefault(); navigateAutocomplete(-1); return; }
         if (e.key === 'Enter') {
             e.preventDefault();
-            e.target.value.split(/[,，\s]+/).filter(Boolean).forEach(addIngredient);
+            if (!selectAutocomplete()) {
+                e.target.value.split(/[,，\s]+/).filter(Boolean).forEach(addIngredient);
+            }
             e.target.value = '';
+            document.getElementById('autocompleteList').style.display = 'none';
+        }
+        if (e.key === 'Escape') {
+            document.getElementById('autocompleteList').style.display = 'none';
         }
         if (e.key === 'Backspace' && !e.target.value && ingredients.size > 0) {
             removeIngredient([...ingredients].pop());
+        }
+    });
+
+    document.getElementById('ingredientInput')?.addEventListener('input', (e) => {
+        showAutocomplete(e.target.value.trim());
+    });
+
+    // Close autocomplete on outside click
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.tag-input-area')) {
+            document.getElementById('autocompleteList').style.display = 'none';
         }
     });
 
@@ -362,6 +522,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Shopping list toggle
+    document.getElementById('shoppingToggleBtn')?.addEventListener('click', () => {
+        const section = document.getElementById('shoppingSection');
+        const btn = document.getElementById('shoppingToggleBtn');
+        const visible = section.style.display !== 'none';
+        section.style.display = visible ? 'none' : 'block';
+        btn.classList.toggle('active', !visible);
+    });
+
+    // Copy shopping list
+    document.getElementById('copyShoppingBtn')?.addEventListener('click', () => {
+        const list = getShoppingList().filter(i => !i.checked);
+        if (list.length === 0) { alert('장보기 목록이 비어있어요'); return; }
+        const text = '🛒 장보기 목록\n' + list.map(i => `☐ ${i.name}`).join('\n');
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copyShoppingBtn');
+            btn.textContent = '✅ 복사됨!';
+            setTimeout(() => { btn.textContent = '📋 복사'; }, 1500);
+        }).catch(() => alert('복사 실패'));
+    });
+
+    // Clear shopping list
+    document.getElementById('clearShoppingBtn')?.addEventListener('click', () => {
+        if (!confirm('장보기 목록을 비울까요?')) return;
+        saveShoppingList([]);
+        updateShoppingBadge();
+        renderShoppingList();
+    });
+
+    // Cart button click (delegated on recipeCards)
+    document.getElementById('recipeCards')?.addEventListener('click', (e) => {
+        const cartBtn = e.target.closest('.cart-btn');
+        if (!cartBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        const idx = parseInt(cartBtn.dataset.idx);
+        const pageSize = getPageSize();
+        const start = (currentPage - 1) * pageSize;
+        const displayResults = showFavoritesOnly ? getFavoritesList() : allResults;
+        const recipe = displayResults[start + idx];
+        if (!recipe) return;
+
+        addToShoppingList(recipe);
+        cartBtn.classList.add('cart-added');
+        cartBtn.textContent = '✓';
+        // Show shopping section
+        document.getElementById('shoppingSection').style.display = 'block';
+        document.getElementById('shoppingToggleBtn')?.classList.add('active');
+    });
+
     init();
 });
 
@@ -465,6 +676,7 @@ function renderResults(query) {
                             <div class="card-ingredients">${esc(r.i)}</div>
                         </div>
                     </a>
+                    <button class="cart-btn" data-idx="${i}" title="장보기 목록에 담기">🛒</button>
                     <button class="fav-btn${favActive}" data-idx="${i}" title="즐겨찾기">${favStar}</button>
                 </div>`;
         }).join('');

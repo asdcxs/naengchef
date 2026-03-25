@@ -21,6 +21,7 @@
                 <div class="header-badges">
                     <div class="db-badge">📚 레시피 <strong id="recipeCount">-</strong>개 보유</div>
                     <button id="favFilterBtn" class="fav-filter-btn" title="즐겨찾기 보기">⭐ <span id="favCount"></span></button>
+                    <button id="shoppingToggleBtn" class="shopping-toggle-btn" title="장보기 목록">🛒 <span id="shoppingCount"></span></button>
                 </div>
             </div>
         </header>
@@ -47,6 +48,7 @@
                     <input type="text" id="ingredientInput"
                         placeholder="재료를 입력하고 Enter (예: 계란, 김치, 두부...)"
                         autocomplete="off">
+                    <div id="autocompleteList" class="autocomplete-list" style="display:none"></div>
                 </div>
 
                 <div class="quick-tags">
@@ -104,6 +106,19 @@
                 </div>
                 <div id="recipeCards" class="recipe-cards"></div>
                 <div id="pagination" class="pagination"></div>
+            </section>
+
+            <!-- Shopping List -->
+            <section id="shoppingSection" class="shopping-section" style="display:none">
+                <div class="shopping-header">
+                    <h2>🛒 장보기 목록</h2>
+                    <div class="shopping-actions">
+                        <button id="copyShoppingBtn" class="shopping-action-btn" title="복사">📋 복사</button>
+                        <button id="clearShoppingBtn" class="shopping-action-btn" title="비우기">🗑 비우기</button>
+                    </div>
+                </div>
+                <div id="shoppingItems" class="shopping-items"></div>
+                <div id="shoppingEmpty" class="shopping-empty">레시피 카드의 🛒 버튼으로 재료를 담아보세요</div>
             </section>
 
             <!-- YouTube Channels -->

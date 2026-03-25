@@ -284,6 +284,79 @@ body {
 .footer a { color: var(--accent); text-decoration: none; }
 .footer a:hover { text-decoration: underline; }
 
+/* === Autocomplete === */
+.tag-input-area { position: relative; }
+.autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 20;
+    background: var(--bg-card); border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    max-height: 200px; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.autocomplete-item {
+    padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.85rem;
+    color: var(--text); transition: background 0.1s; border-bottom: 1px solid var(--border);
+}
+.autocomplete-item:hover, .autocomplete-item.highlighted {
+    background: var(--accent-glow); color: var(--accent);
+}
+.autocomplete-item mark {
+    background: none; color: var(--accent); font-weight: 700;
+}
+
+/* === Shopping List === */
+.shopping-section {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem; margin-bottom: 1.5rem; animation: fadeUp 0.3s ease-out;
+}
+.shopping-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.shopping-header h2 { font-size: 1.1rem; font-weight: 700; }
+.shopping-actions { display: flex; gap: 0.4rem; }
+.shopping-action-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 0.25rem 0.6rem; border-radius: 2rem; font-size: 0.75rem; font-family: var(--font);
+    cursor: pointer; transition: all 0.2s;
+}
+.shopping-action-btn:hover { background: var(--accent-glow); color: var(--accent); border-color: rgba(232, 150, 63, 0.3); }
+.shopping-items { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.shopping-item {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 0.35rem 0.7rem; border-radius: 2rem; font-size: 0.82rem; color: var(--text);
+    transition: all 0.2s; cursor: default;
+}
+.shopping-item a {
+    color: var(--text); text-decoration: none; transition: color 0.2s;
+}
+.shopping-item a:hover { color: var(--accent); }
+.shopping-item .shop-del {
+    cursor: pointer; color: var(--text-muted); font-size: 0.9rem; margin-left: 0.15rem;
+    transition: color 0.15s;
+}
+.shopping-item .shop-del:hover { color: #e74c3c; }
+.shopping-item.checked { opacity: 0.45; text-decoration: line-through; }
+.shopping-empty { font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 0.5rem; }
+.shopping-toggle-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+    padding: 0.3rem 0.75rem; border-radius: 2rem; font-size: 0.8rem; font-family: var(--font);
+    cursor: pointer; transition: all 0.2s;
+}
+.shopping-toggle-btn:hover { background: var(--accent-glow); border-color: rgba(232, 150, 63, 0.3); color: var(--accent); }
+.shopping-toggle-btn.active { background: var(--accent); color: var(--bg); border-color: transparent; font-weight: 600; }
+.shopping-toggle-btn #shoppingCount { font-weight: 700; }
+
+/* Cart button on recipe card */
+.cart-btn {
+    position: absolute; top: 0.5rem; right: 2.8rem; z-index: 2;
+    background: rgba(0,0,0,0.55); border: none; color: var(--text-muted);
+    width: 2rem; height: 2rem; border-radius: 50%; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.cart-btn:hover { background: rgba(0,0,0,0.75); color: #60a5fa; transform: scale(1.15); }
+.cart-btn.cart-added { color: #60a5fa; background: rgba(0,0,0,0.7); }
+
 /* === Responsive === */
 @media (max-width: 640px) {
     .header { padding: 1.75rem 0 1rem; }
@@ -291,4 +364,5 @@ body {
     .search-section { padding: 1.25rem; }
     .recipe-cards { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     .channels-grid { grid-template-columns: 1fr; }
+    .shopping-header { flex-wrap: wrap; gap: 0.5rem; }
 }
