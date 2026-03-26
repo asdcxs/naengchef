@@ -5,6 +5,7 @@ let ALL_CHANNELS = [];
 let QUICK_DATA = {};
 let INGREDIENT_INDEX = [];
 const ingredients = new Set();
+const excludeIngredients = new Set();
 let allResults = [];
 let currentPage = 1;
 let matchMode = 'or';
@@ -60,16 +61,31 @@ function renderRecentSearches() {
     const recent = getRecentSearches();
     if (recent.length === 0) { container.style.display = 'none'; return; }
     container.style.display = 'block';
-    container.innerHTML = `<div class="recent-label">🕐 최근 검색</div><div class="recent-tags">${
-        recent.map(r => `<button class="recent-tag" data-ings='${JSON.stringify(r.ingredients)}'>${r.ingredients.join(' + ')}</button>`).join('')
+    container.innerHTML = `<div class="recent-header"><span class="recent-label">🕐 최근 검색</span><button class="recent-clear">지우기</button></div><div class="recent-tags">${
+        recent.map((r,i) => `<button class="recent-tag" data-idx="${i}" data-ings='${JSON.stringify(r.ingredients)}'>${r.ingredients.join(' + ')}<span class="recent-del" data-idx="${i}">&times;</span></button>`).join('')
     }</div>`;
     container.querySelectorAll('.recent-tag').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            if (e.target.classList.contains('recent-del')) return;
             ingredients.clear();
             JSON.parse(btn.dataset.ings).forEach(i => ingredients.add(i));
             render();
             doSearch();
         });
+    });
+    container.querySelectorAll('.recent-del').forEach(del => {
+        del.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(del.dataset.idx);
+            const r = getRecentSearches();
+            r.splice(idx, 1);
+            localStorage.setItem('fridge_chef_recent', JSON.stringify(r));
+            renderRecentSearches();
+        });
+    });
+    container.querySelector('.recent-clear')?.addEventListener('click', () => {
+        localStorage.removeItem('fridge_chef_recent');
+        renderRecentSearches();
     });
 }
 
@@ -95,6 +111,7 @@ async function init() {
         renderQuickButtons();
         renderChannels();
         renderRecentSearches();
+        loadExcludes();
         updateFavBadge();
         updateShoppingBadge();
         renderShoppingList();
@@ -210,6 +227,25 @@ function renderShoppingList() {
     container.querySelectorAll('.shop-done').forEach(btn => {
         btn.addEventListener('click', () => { const row = btn.closest('.shop-row'); row.classList.add('removing'); setTimeout(() => { const l = getShoppingList().filter(i => i.name !== btn.dataset.name); saveShoppingList(l); updateShoppingBadge(); renderShoppingList(); }, 150); });
     });
+}
+
+// === Exclude Ingredients ===
+function addExclude(name) { name = name.trim(); if (!name || excludeIngredients.has(name)) return; excludeIngredients.add(name); renderExcludes(); }
+function removeExclude(name) { excludeIngredients.delete(name); renderExcludes(); }
+function renderExcludes() {
+    const container = document.getElementById('excludeTags');
+    if (!container) return;
+    container.innerHTML = [...excludeIngredients].map(name =>
+        `<span class="exclude-tag">🚫 ${esc(name)}<span class="ex-del" data-name="${name}">&times;</span></span>`
+    ).join('');
+    container.querySelectorAll('.ex-del').forEach(del => {
+        del.addEventListener('click', () => removeExclude(del.dataset.name));
+    });
+    // Save to localStorage
+    localStorage.setItem('fridge_chef_excludes', JSON.stringify([...excludeIngredients]));
+}
+function loadExcludes() {
+    try { const saved = JSON.parse(localStorage.getItem('fridge_chef_excludes') || '[]'); saved.forEach(n => excludeIngredients.add(n)); renderExcludes(); } catch {}
 }
 
 // === Channels ===
@@ -332,6 +368,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
     });
 
+    // Exclude input
+    document.getElementById('excludeInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.target.value.split(/[,，\s]+/).filter(Boolean).forEach(addExclude);
+            e.target.value = '';
+        }
+    });
+
     // Pagination
     document.getElementById('pagination')?.addEventListener('click', (e) => { const btn = e.target.closest('.page-btn'); if (!btn) return; currentPage = parseInt(btn.dataset.page); renderResults(); document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}); });
 
@@ -424,7 +469,10 @@ function doSearch() {
     saveRecentSearch(ingList);
 
     const scored = [], minMatch = matchMode === 'and' ? ingList.length : 1;
+    const exList = [...excludeIngredients];
     for (const r of ALL_RECIPES) {
+        // 제외 재료가 포함되면 스킵
+        if (exList.length && exList.some(ex => r.i.includes(ex))) continue;
         let mc = 0;
         for (const ing of ingList) if (r.i.includes(ing)) mc++;
         if (mc >= minMatch) scored.push({...r, match_count:mc, total_searched:ingList.length});

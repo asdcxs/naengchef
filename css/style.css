@@ -418,14 +418,45 @@ body {
 
 /* === Recent Searches === */
 .recent-searches { margin-top: 0.75rem; }
-.recent-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+.recent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+.recent-label { font-size: 0.75rem; color: var(--text-muted); }
+.recent-clear {
+    background: none; border: none; color: var(--text-muted); font-size: 0.7rem;
+    cursor: pointer; font-family: var(--font); padding: 0.1rem 0.3rem; transition: color 0.2s;
+}
+.recent-clear:hover { color: #e74c3c; }
 .recent-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 .recent-tag {
     background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
     padding: 0.25rem 0.6rem; border-radius: 2rem; font-size: 0.75rem; font-family: var(--font);
-    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap; position: relative;
 }
 .recent-tag:hover { background: var(--accent-glow); color: var(--accent); border-color: rgba(232, 150, 63, 0.3); }
+.recent-del {
+    margin-left: 0.3rem; font-size: 0.85rem; color: var(--text-muted); transition: color 0.15s;
+}
+.recent-del:hover { color: #e74c3c; }
+
+/* === Exclude Tags === */
+.exclude-area { margin-top: 0.75rem; }
+.exclude-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.exclude-label { font-size: 0.75rem; color: var(--text-muted); }
+.exclude-input-wrap { display: flex; gap: 0.3rem; align-items: center; }
+.exclude-input {
+    background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 0.35rem 0.6rem; color: var(--text); font-size: 0.8rem; font-family: var(--font);
+    outline: none; width: 120px; transition: border-color 0.2s;
+}
+.exclude-input:focus { border-color: var(--accent); }
+.exclude-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+.exclude-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+.exclude-tag {
+    display: inline-flex; align-items: center; gap: 0.2rem;
+    background: rgba(231, 76, 60, 0.15); border: 1px solid rgba(231, 76, 60, 0.3);
+    color: #e74c3c; padding: 0.2rem 0.5rem; border-radius: 2rem; font-size: 0.75rem;
+}
+.exclude-tag .ex-del { cursor: pointer; font-size: 0.85rem; margin-left: 0.15rem; transition: opacity 0.15s; }
+.exclude-tag .ex-del:hover { opacity: 0.6; }
 
 /* === Recipe Modal === */
 .recipe-modal {
