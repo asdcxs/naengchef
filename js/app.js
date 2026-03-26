@@ -230,7 +230,10 @@ function render() {
     tagsEl().innerHTML = '';
     ingredients.forEach(name => { const s = document.createElement('span'); s.className = 'tag'; s.innerHTML = `${name}<span class="tag-remove" data-name="${name}">&times;</span>`; tagsEl().appendChild(s); });
     document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.toggle('active', ingredients.has(btn.dataset.ing)));
-    searchBtn().disabled = ingredients.size === 0;
+    const disabled = ingredients.size === 0;
+    searchBtn().disabled = disabled;
+    const ytBtn = document.getElementById('youtubeBtn');
+    if (ytBtn) ytBtn.disabled = disabled;
 }
 
 // === Recipe Detail Modal ===
@@ -323,9 +326,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }); }
 
     document.getElementById('searchBtn')?.addEventListener('click', doSearch);
+    document.getElementById('youtubeBtn')?.addEventListener('click', () => {
+        if (ingredients.size === 0) return;
+        const q = [...ingredients].join(' ') + ' 레시피';
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
+    });
 
     // Pagination
     document.getElementById('pagination')?.addEventListener('click', (e) => { const btn = e.target.closest('.page-btn'); if (!btn) return; currentPage = parseInt(btn.dataset.page); renderResults(); document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}); });
+
+    // Sort select
+    document.getElementById('sortSelect')?.addEventListener('change', (e) => {
+        sortResults(e.target.value);
+        currentPage = 1;
+        renderResults();
+    });
 
     // Favorite click
     document.getElementById('recipeCards')?.addEventListener('click', (e) => {
@@ -369,6 +384,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // === Search ===
+function sortResults(mode) {
+    switch(mode) {
+        case 'popular':
+            // 크롤링 순서상 id(index) 낮을수록 인기 → ALL_RECIPES에서의 원래 인덱스 기준
+            allResults.sort((a,b) => {
+                if (b.match_count !== a.match_count) return b.match_count - a.match_count;
+                return ALL_RECIPES.indexOf(a) - ALL_RECIPES.indexOf(b);
+            });
+            break;
+        case 'newest':
+            allResults.sort((a,b) => {
+                if (b.match_count !== a.match_count) return b.match_count - a.match_count;
+                return ALL_RECIPES.indexOf(b) - ALL_RECIPES.indexOf(a);
+            });
+            break;
+        case 'quick':
+            allResults.sort((a,b) => {
+                if (b.match_count !== a.match_count) return b.match_count - a.match_count;
+                const timeA = parseTime(a.ct), timeB = parseTime(b.ct);
+                return timeA - timeB;
+            });
+            break;
+        default: // match
+            allResults.sort((a,b) => b.match_count - a.match_count);
+    }
+}
+
+function parseTime(str) {
+    if (!str) return 999;
+    const m = str.match(/(\d+)/);
+    return m ? parseInt(m[1]) : 999;
+}
+
 function doSearch() {
     if (ingredients.size === 0) return;
     const ingList = [...ingredients];
@@ -383,6 +431,8 @@ function doSearch() {
     }
     scored.sort((a,b) => b.match_count - a.match_count);
     allResults = scored.slice(0, 200);
+    const sortSel = document.getElementById('sortSelect');
+    if (sortSel && sortSel.value !== 'match') sortResults(sortSel.value);
     currentPage = 1;
     renderResults(ingList);
 }

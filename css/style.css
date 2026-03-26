@@ -471,3 +471,23 @@ body {
 
 /* === Page dots === */
 .page-dots { color: var(--text-muted); font-size: 0.8rem; padding: 0 0.2rem; }
+
+/* === Sort Select === */
+.results-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.sort-select {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 0.3rem 0.6rem; border-radius: 2rem; font-size: 0.78rem; font-family: var(--font);
+    cursor: pointer; transition: all 0.2s; outline: none;
+}
+.sort-select:hover, .sort-select:focus { border-color: rgba(232, 150, 63, 0.3); background: var(--accent-glow); }
+
+/* === Search Actions Row === */
+.search-actions { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
+.search-btn { flex: 1; }
+.youtube-btn {
+    padding: 0.9rem 1.2rem; background: #ff0000; border: none; border-radius: var(--radius-sm);
+    color: white; font-size: 0.9rem; font-weight: 700; font-family: var(--font);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.youtube-btn:hover:not(:disabled) { background: #cc0000; transform: translateY(-1px); }
+.youtube-btn:disabled { opacity: 0.4; cursor: not-allowed; }

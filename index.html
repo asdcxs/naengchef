@@ -96,15 +96,28 @@
                     </div>
                 </div>
 
-                <button id="searchBtn" class="search-btn" disabled>
-                    <span class="search-btn-text">🔍 레시피 찾기</span>
-                </button>
+                <div class="search-actions">
+                    <button id="searchBtn" class="search-btn" disabled>
+                        <span class="search-btn-text">🔍 레시피 찾기</span>
+                    </button>
+                    <button id="youtubeBtn" class="youtube-btn" disabled>
+                        ▶ 유튜브
+                    </button>
+                </div>
             </section>
 
             <section id="results" class="results-section" style="display:none">
                 <div class="results-header">
                     <h2 id="resultsTitle">📋 검색 결과</h2>
-                    <div id="youtubeLink" class="youtube-link"></div>
+                    <div class="results-controls">
+                        <select id="sortSelect" class="sort-select">
+                            <option value="match">일치율순</option>
+                            <option value="popular">인기순</option>
+                            <option value="newest">최신순</option>
+                            <option value="quick">간단한순</option>
+                        </select>
+                        <div id="youtubeLink" class="youtube-link"></div>
+                    </div>
                 </div>
                 <div id="recipeCards" class="recipe-cards"></div>
                 <div id="pagination" class="pagination"></div>
