@@ -351,7 +351,7 @@ body {
 .shop-row {
     display: flex; align-items: center; gap: 0.5rem;
     padding: 0.55rem 0; border-bottom: 1px solid var(--border);
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.15s, transform 0.15s;
 }
 .shop-row.removing { opacity: 0; transform: translateX(40px); }
 .shop-row .shop-name {

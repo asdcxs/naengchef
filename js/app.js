@@ -304,7 +304,7 @@ function renderShoppingList() {
                 saveShoppingList(l);
                 updateShoppingBadge();
                 renderShoppingList();
-            }, 300);
+            }, 150);
         });
     });
 }
