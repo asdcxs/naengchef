@@ -185,7 +185,9 @@ function buildIngredientIndex() {
             let name = item.replace(/\s+[\d./½⅓¼⅔¾~].*$/, '').replace(/\s*\(.*?\)/, '').trim();
             if (name.length < 2 || name.length > 8) continue;
             if (/^[\d./\s]+$/.test(name)) continue;
-            counter[name] = (counter[name] || 0) + 1;
+            // 공백 제거한 키로 합산 ("다진 마늘" → "다진마늘")
+            const key = name.replace(/\s+/g, '');
+            counter[key] = (counter[key] || 0) + 1;
         }
     }
     INGREDIENT_INDEX = Object.entries(counter)
