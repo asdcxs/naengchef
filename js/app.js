@@ -288,32 +288,23 @@ function renderShoppingList() {
         return;
     }
     if (empty) empty.style.display = 'none';
-    const sorted = [...list].sort((a, b) => (a.checked ? 1 : 0) - (b.checked ? 1 : 0));
-    container.innerHTML = sorted.map(item => {
-        const cls = item.checked ? ' checked' : '';
-        return `<div class="shop-row${cls}" data-name="${esc(item.name)}">
-            <input type="checkbox" class="shop-check" ${item.checked ? 'checked' : ''}>
+    container.innerHTML = `<div class="shop-summary">${list.length}개 재료</div>` +
+        list.map(item =>
+        `<div class="shop-row" data-name="${esc(item.name)}">
             <span class="shop-name">${esc(item.name)}</span>
-            <button class="shop-del" data-name="${esc(item.name)}">&times;</button>
-        </div>`;
-    }).join('');
-    container.querySelectorAll('.shop-check').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            const name = e.target.closest('.shop-row').dataset.name;
-            const l = getShoppingList();
-            const it = l.find(i => i.name === name);
-            if (it) it.checked = e.target.checked;
-            saveShoppingList(l);
-            updateShoppingBadge();
-            renderShoppingList();
-        });
-    });
-    container.querySelectorAll('.shop-del').forEach(del => {
-        del.addEventListener('click', () => {
-            const l = getShoppingList().filter(i => i.name !== del.dataset.name);
-            saveShoppingList(l);
-            updateShoppingBadge();
-            renderShoppingList();
+            <button class="shop-done" data-name="${esc(item.name)}" title="구매 완료">✓ 완료</button>
+        </div>`
+    ).join('');
+    container.querySelectorAll('.shop-done').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = btn.closest('.shop-row');
+            row.classList.add('removing');
+            setTimeout(() => {
+                const l = getShoppingList().filter(i => i.name !== btn.dataset.name);
+                saveShoppingList(l);
+                updateShoppingBadge();
+                renderShoppingList();
+            }, 300);
         });
     });
 }
