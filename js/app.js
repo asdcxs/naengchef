@@ -375,14 +375,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sort select
     document.getElementById('sortSelect')?.addEventListener('change', (e) => {
-        if (e.target.value === 'ttokttak') {
-            // 필터 모드: 원본에서 다시 필터
-            doSearch();
-        } else {
-            sortResults(e.target.value);
-            currentPage = 1;
-            renderResults();
-        }
+        sortResults(e.target.value);
+        currentPage = 1;
+        renderResults();
+    });
+
+    // Ttokttak filter checkbox
+    document.getElementById('ttokttakFilter')?.addEventListener('change', () => {
+        if (ingredients.size > 0) doSearch();
     });
 
     // Favorite click
@@ -428,10 +428,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // === Search ===
 function sortResults(mode) {
-    if (mode === 'ttokttak') {
-        allResults = allResults.filter(r => r.st === '뚝딱이형');
-        return;
-    }
     switch(mode) {
         case 'popular':
             allResults.sort((a,b) => {
@@ -470,9 +466,10 @@ function doSearch() {
 
     const scored = [], minMatch = matchMode === 'and' ? ingList.length : 1;
     const exList = [...excludeIngredients];
+    const ttokOnly = document.getElementById('ttokttakFilter')?.checked;
     for (const r of ALL_RECIPES) {
-        // 제외 재료가 포함되면 스킵
         if (exList.length && exList.some(ex => r.i.includes(ex))) continue;
+        if (ttokOnly && r.st !== '뚝딱이형') continue;
         let mc = 0;
         for (const ing of ingList) if (r.i.includes(ing)) mc++;
         if (mc >= minMatch) scored.push({...r, match_count:mc, total_searched:ingList.length});
