@@ -1,0 +1,14 @@
+{
+    "name": "냉장고 셰프",
+    "short_name": "냉장고셰프",
+    "description": "냉장고 재료를 넣으면, 요리가 나옵니다",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#1a1612",
+    "theme_color": "#1a1612",
+    "orientation": "portrait-primary",
+    "icons": [
+        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ]
+}

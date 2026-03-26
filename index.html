@@ -2,9 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>냉장고 셰프</title>
     <meta name="description" content="냉장고 재료를 넣으면 요리가 나옵니다. 91,000+ 레시피 검색.">
+    <meta name="theme-color" content="#1a1612">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&family=Jua&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
@@ -19,22 +24,20 @@
                 </h1>
                 <p class="tagline">냉장고 재료를 넣으면, 요리가 나옵니다</p>
                 <div class="header-badges">
-                    <div class="db-badge">📚 레시피 <strong id="recipeCount">-</strong>개 보유</div>
-                    <button id="favFilterBtn" class="fav-filter-btn" title="즐겨찾기 보기">⭐ <span id="favCount"></span></button>
+                    <div class="db-badge">📚 레시피 <strong id="recipeCount">-</strong>개</div>
+                    <button id="favFilterBtn" class="fav-filter-btn" title="즐겨찾기">⭐ <span id="favCount"></span></button>
                     <button id="shoppingToggleBtn" class="shopping-toggle-btn" title="장보기 목록">🛒 <span id="shoppingCount"></span></button>
                 </div>
             </div>
         </header>
 
         <main class="main">
-            <!-- Loading -->
             <div id="loading" class="empty-state">
                 <div class="empty-icon">⏳</div>
                 <p>레시피 데이터 로딩 중...</p>
                 <div id="loadProgress" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem"></div>
             </div>
 
-            <!-- Search Section -->
             <section id="searchSection" class="search-section" style="display:none">
                 <div class="search-header-row">
                     <label class="input-label" for="ingredientInput">냉장고에 뭐가 있나요?</label>
@@ -45,11 +48,12 @@
                 </div>
                 <div class="tag-input-area">
                     <div id="tags" class="tags"></div>
-                    <input type="text" id="ingredientInput"
-                        placeholder="재료를 입력하고 Enter (예: 계란, 김치, 두부...)"
-                        autocomplete="off">
+                    <input type="text" id="ingredientInput" placeholder="재료를 입력하고 Enter" autocomplete="off">
                     <div id="autocompleteList" class="autocomplete-list" style="display:none"></div>
                 </div>
+
+                <!-- Recent Searches -->
+                <div id="recentSearches" class="recent-searches" style="display:none"></div>
 
                 <div class="quick-tags">
                     <div class="quick-tags-header">
@@ -61,11 +65,10 @@
                         <span class="quick-label">🫗 소스 · 양념</span>
                     </div>
                     <div id="quickSauceButtons" class="quick-buttons"></div>
-                    <!-- Add Quick Ingredient (hidden) -->
                     <div id="addQuickForm" class="add-quick-form" style="display:none">
-                        <input type="text" id="qIngName" placeholder="재료 이름 (예: 닭고기)" class="ch-input" style="flex:2">
+                        <input type="text" id="qIngName" placeholder="재료 이름" class="ch-input" style="flex:2">
                         <div class="emoji-dropdown">
-                            <button type="button" id="emojiToggle" class="emoji-toggle" title="이모지 선택">🍴</button>
+                            <button type="button" id="emojiToggle" class="emoji-toggle">🍴</button>
                             <div id="emojiList" class="emoji-list" style="display:none">
                                 <button type="button" class="emoji-opt" data-emoji="🍴">🍴</button>
                                 <button type="button" class="emoji-opt" data-emoji="🥩">🥩</button>
@@ -98,7 +101,6 @@
                 </button>
             </section>
 
-            <!-- Results -->
             <section id="results" class="results-section" style="display:none">
                 <div class="results-header">
                     <h2 id="resultsTitle">📋 검색 결과</h2>
@@ -108,15 +110,11 @@
                 <div id="pagination" class="pagination"></div>
             </section>
 
-            <!-- YouTube Channels -->
             <section class="channels-section">
-                <div class="channels-header">
-                    <h2>📺 추천 요리 유튜버</h2>
-                </div>
+                <div class="channels-header"><h2>📺 추천 요리 유튜버</h2></div>
                 <div id="channelsGrid" class="channels-grid"></div>
             </section>
 
-            <!-- Empty state -->
             <section id="emptyState" class="empty-state" style="display:none">
                 <div class="empty-icon">🍳</div>
                 <p>재료를 입력하면 만들 수 있는 요리를 찾아드려요</p>
@@ -126,6 +124,14 @@
         <footer class="footer">
             <p>레시피 출처: <a href="https://www.10000recipe.com" target="_blank">만개의레시피</a> · <a href="https://chef-choice.tistory.com" target="_blank">뚝딱이형</a></p>
         </footer>
+    </div>
+
+    <!-- Recipe Detail Modal -->
+    <div id="recipeModal" class="recipe-modal" style="display:none">
+        <div class="modal-dialog">
+            <button class="modal-close">&times;</button>
+            <div id="recipeModalContent" class="modal-content"></div>
+        </div>
     </div>
 
     <!-- Shopping Sidebar -->
