@@ -268,8 +268,6 @@ function render() {
     document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.toggle('active', ingredients.has(btn.dataset.ing)));
     const disabled = ingredients.size === 0;
     searchBtn().disabled = disabled;
-    const ytBtn = document.getElementById('youtubeBtn');
-    if (ytBtn) ytBtn.disabled = disabled;
 }
 
 // === Recipe Detail Modal ===
@@ -362,11 +360,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }); }
 
     document.getElementById('searchBtn')?.addEventListener('click', doSearch);
-    document.getElementById('youtubeBtn')?.addEventListener('click', () => {
-        if (ingredients.size === 0) return;
-        const q = [...ingredients].join(' ') + ' 레시피';
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, '_blank');
-    });
 
     // Exclude input
     document.getElementById('excludeInput')?.addEventListener('keydown', (e) => {
@@ -382,9 +375,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sort select
     document.getElementById('sortSelect')?.addEventListener('change', (e) => {
-        sortResults(e.target.value);
-        currentPage = 1;
-        renderResults();
+        if (e.target.value === 'ttokttak') {
+            // 필터 모드: 원본에서 다시 필터
+            doSearch();
+        } else {
+            sortResults(e.target.value);
+            currentPage = 1;
+            renderResults();
+        }
     });
 
     // Favorite click
@@ -430,9 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // === Search ===
 function sortResults(mode) {
+    if (mode === 'ttokttak') {
+        allResults = allResults.filter(r => r.st === '뚝딱이형');
+        return;
+    }
     switch(mode) {
         case 'popular':
-            // 크롤링 순서상 id(index) 낮을수록 인기 → ALL_RECIPES에서의 원래 인덱스 기준
             allResults.sort((a,b) => {
                 if (b.match_count !== a.match_count) return b.match_count - a.match_count;
                 return ALL_RECIPES.indexOf(a) - ALL_RECIPES.indexOf(b);
@@ -447,11 +448,10 @@ function sortResults(mode) {
         case 'quick':
             allResults.sort((a,b) => {
                 if (b.match_count !== a.match_count) return b.match_count - a.match_count;
-                const timeA = parseTime(a.ct), timeB = parseTime(b.ct);
-                return timeA - timeB;
+                return parseTime(a.ct) - parseTime(b.ct);
             });
             break;
-        default: // match
+        default:
             allResults.sort((a,b) => b.match_count - a.match_count);
     }
 }

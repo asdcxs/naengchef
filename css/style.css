@@ -512,13 +512,3 @@ body {
 }
 .sort-select:hover, .sort-select:focus { border-color: rgba(232, 150, 63, 0.3); background: var(--accent-glow); }
 
-/* === Search Actions Row === */
-.search-actions { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
-.search-btn { flex: 1; }
-.youtube-btn {
-    padding: 0.9rem 1.2rem; background: #ff0000; border: none; border-radius: var(--radius-sm);
-    color: white; font-size: 0.9rem; font-weight: 700; font-family: var(--font);
-    cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
-.youtube-btn:hover:not(:disabled) { background: #cc0000; transform: translateY(-1px); }
-.youtube-btn:disabled { opacity: 0.4; cursor: not-allowed; }
